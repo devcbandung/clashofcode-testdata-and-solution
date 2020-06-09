@@ -1,5 +1,13 @@
-**/tc
-**/runner
-!tcframe/include/tcframe/runner
-**/solution
-*.zip
+# ignore all but whitelisted files
+*
+!*/
+!.gitignore
+!tcframe/*
+
+!*.md
+!.env
+!build
+!*.hpp
+!*.cpp
+!*.py
+!*.txt
