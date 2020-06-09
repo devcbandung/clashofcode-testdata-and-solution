@@ -1,0 +1,60 @@
+#!/bin/bash
+set -e
+shopt -s expand_aliases
+
+TMP=${PWD##*/}
+
+# find root directory
+# todo: find more deterministic way other than finding "tcframe" file
+while [ ! -d tcframe ]; do
+  cd ..
+  if [[ "`pwd`" = / ]]; then
+    echo "build must be run inside the clash-of-code-2020 git repository"
+    exit 1
+  fi
+done
+export TCFRAME_HOME=`pwd`/tcframe
+alias tcframe=$TCFRAME_HOME/scripts/tcframe
+source .env
+
+if [ ! -n "$1" ] ; then
+  PROBLEM=$TMP
+else
+  PROBLEM=$1
+fi
+
+echo "Building test cases for problem $PROBLEM..."
+
+if [ ! -d "$PROBLEM" ]; then
+  echo "Problem directory $PROBLEM does not exist"
+  exit 1
+fi
+
+cd $PROBLEM
+if [ ! -f "spec.cpp" ]; then
+  echo "spec.cpp file not found"
+  exit 1
+fi
+if [ ! -f "solution.cpp" ]; then
+  echo "solution.cpp file not found"
+  exit 1
+fi
+echo "Compiling solution and spec..."
+g++ -std=c++11 solution.cpp -o solution
+tcframe build
+./runner
+
+echo "Packing test cases..."
+rm -rf tchr
+mkdir -p tchr/input
+mkdir -p tchr/output
+for f in tc/*.in; do
+  cp "$f" "tchr/input/$(echo "$f" | sed s/tc\\/// | sed s/"$PROBLEM"_/input/ | sed s/\\.in/\\.txt/)";
+done
+for f in tc/*.out; do
+  cp "$f" "tchr/output/$(echo "$f" | sed s/tc\\/// | sed s/"$PROBLEM"_/output/ | sed s/\\.out/\\.txt/)";
+done
+rm -f tc-$PROBLEM.zip
+cd tchr && zip tc-$PROBLEM */** && mv tc-$PROBLEM.zip .. && cd ..
+rm -rf tchr
+echo "Packing done. File tc-$PROBLEM.zip ready to upload!"
