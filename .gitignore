@@ -1,4 +1,5 @@
 **/tc
-runner
-solution
+**/runner
+!tcframe/include/tcframe/runner
+**/solution
 *.zip
