@@ -69,15 +69,15 @@ protected:
     CASE(N = 4, M = 4, S = {"a", "a", "a", "b"}, T = {"a", "a", "b", "b"});
 
     // Test Cases
-    // 40% = 10 tc
+    // 40% = 12 tc
     // max ans
     CASE(N = 1000, M = 1000, allsame(20000));
     CASE(N = 1000, M = 1000, maxlen(10));
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 10; ++i) {
       CASE(N = rnd.nextInt(1, 1000), M = rnd.nextInt(1, 1000), maxlen(10));
     }
 
-    // 60% = 15 tc
+    // 60% = 18 tc
     // max length (999999)(1)
     CASE(N = 1, M = 1, S = {randomstring(999999)}, T = {randomstring(1)});
     // max pair (500000)(500000)
@@ -93,7 +93,8 @@ protected:
     //       - fill the rest with random short strings
     CASE(N = 100000, M = 100000, random());
     CASE(N = 100000, M = 100000, random());
-    for (int i = 0; i < 8; ++i) {
+    CASE(N = 100000, M = 100000, random());
+    for (int i = 0; i < 10; ++i) {
       CASE(N = rnd.nextInt(1, 100000), M = rnd.nextInt(1, 100000), random());
     }
   }
