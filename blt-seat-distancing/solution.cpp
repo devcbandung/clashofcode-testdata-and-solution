@@ -5,7 +5,7 @@ int main() {
     int x, panjang,lebar, i, j, k, l;
     int star = 1;
     cin >> x;
-    cin >> panjang >> lebar;
+    cin >> lebar >> panjang;
 
     if(x > 0 && panjang > 0 && lebar > 0){
         for(i = 0;i < lebar; i++){
