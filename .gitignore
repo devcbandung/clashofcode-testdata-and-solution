@@ -8,6 +8,7 @@
 !.env
 !build
 !*.hpp
+!*.h
 !*.cpp
 !*.py
 !*.txt
