@@ -67,39 +67,44 @@ int main() {
     vector<segment> S = {L[k]};
 
     for (int i = 0; i < L.size(); ++i) {
+      if (isStraight(origin, L[i].p1, L[i].p2)) continue;
       if (i == k) continue;
       vector<segment> tmp;
       for (segment s : S) {
         polygon tri = {origin, s.p1, s.p2};
         segment r1(origin, s.p1), r2(origin, s.p2);
         if (isIntersecting(L[i], r1) && isIntersecting(L[i], r2)) {
-          debug("both intersecting! "); debugSegment(L[i]); debug(" with "); debugSegment(r1); debug(" and "); debugSegment(r2); debug("\n");
+          // debug("both intersecting! "); debugSegment(L[i]); debug(" with "); debugSegment(r1); debug(" and "); debugSegment(r2); debug("\n");
           continue;
         }
         if (isIntersecting(L[i], r1)) {
-          debug("intersecting with r1\n");
-          if (isPointInsideTriangle(L[i].p1, tri)) {
-            debug("inside: "); debugPoint(L[i].p1); debug("\n");
+          // debug("intersecting with r1\n");
+          if (isPointInsidePolygon(L[i].p1, tri)) {
+            // debug("inside: "); debugPoint(L[i].p1); debug("\n");
             tmp.emplace_back(intersection(s, segment(origin, L[i].p1)), s.p2);
-          } else {
-            debug("inside: "); debugPoint(L[i].p2); debug("\n");
+          } else if (isPointInsidePolygon(L[i].p2, tri)) {
+            // debug("inside: "); debugPoint(L[i].p2); debug("\n");
             tmp.emplace_back(intersection(s, segment(origin, L[i].p2)), s.p2);
+          } else {
+            tmp.push_back(s);
           }
           continue;
         }
         if (isIntersecting(L[i], r2)) {
-          debug("intersecting with r2\n");
-          if (isPointInsideTriangle(L[i].p1, tri)) {
-            debug("inside: "); debugPoint(L[i].p1); debug("\n");
+          // debug("intersecting with r2\n");
+          if (isPointInsidePolygon(L[i].p1, tri)) {
+            // debug("inside: "); debugPoint(L[i].p1); debug("\n");
             tmp.emplace_back(intersection(s, segment(origin, L[i].p1)), s.p1);
-          } else {
-            debug("inside: "); debugPoint(L[i].p2); debug("\n");
+          } else if (isPointInsidePolygon(L[i].p2, tri)) {
+            // debug("inside: "); debugPoint(L[i].p2); debug("\n");
             tmp.emplace_back(intersection(s, segment(origin, L[i].p2)), s.p1);
+          } else {
+            tmp.push_back(s);
           }
           continue;
         }
         
-        if (isPointInsideTriangle(L[i].p1, tri) && isPointInsideTriangle(L[i].p2, tri)) {
+        if (isPointInsidePolygon(L[i].p1, tri) && isPointInsidePolygon(L[i].p2, tri)) {
           point t1 = intersection(s, segment(origin, L[i].p1));
           point t2 = intersection(s, segment(origin, L[i].p2));
           if (dist(s.p1, t1) < dist(s.p1, t2)) {
@@ -114,13 +119,16 @@ int main() {
 
         tmp.push_back(s);
       }
-      S = tmp;
-      debug("original: "); debugSegment(L[k]); debug("\n");
-      debug("after cut with :"); debugSegment(L[i]); debug("\n");
-      for (segment s : S) {
-        debug("\t"); debugSegment(s); debug("\n");
+      S.clear();
+      for (segment s : tmp) {
+        if (length(s) > EPS) S.push_back(s);
       }
-      debug("--\n");
+      // debug("original: "); debugSegment(L[k]); debug("\n");
+      // debug("after cut with :"); debugSegment(L[i]); debug("\n");
+      // for (segment s : S) {
+      //   debug("\t"); debugSegment(s); debug("\n");
+      // }
+      // debug("--\n");
     }
 
     debug("original: "); debugSegment(L[k]); debug("\n");

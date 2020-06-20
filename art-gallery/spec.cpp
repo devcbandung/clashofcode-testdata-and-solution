@@ -4,6 +4,15 @@
 using namespace std;
 using namespace tcframe;
 
+#define MAXX 10000
+#define MAXN 5000
+#define MAXM 5000
+
+#define MODE_SQUARE 0
+#define MODE_CIRCLE 1
+
+const point origin(0, 0);
+
 vector<point> pointFromVector(const vector<int> &x, const vector<int> &y) {
   vector<point> p;
   assert(x.size() == y.size());
@@ -19,8 +28,6 @@ vector<point> pointFromVectorPair(const vector<pair<int,int>> &x) {
   }
   return p;
 }
-
-#define MAXX 1000
 
 class ProblemSpec : public BaseProblemSpec {
 protected:
@@ -44,8 +51,8 @@ protected:
   }
 
   void Constraints() {
-    CONS(1 <= N && N <= 1000);
-    CONS(1 <= M && M <= 1000);
+    CONS(3 <= N && N <= MAXN);
+    CONS(0 <= M && M <= MAXM);
     CONS(withinRange(GX));
     CONS(withinRange(GY));
     CONS(withinRange(LAX));
@@ -76,11 +83,25 @@ protected:
       point r = G[(i+2)%N];
       if (isRightTurn(p, q, r)) {
         if (!isOnLine(p, segment(q, r))) {
+          puts("right turn!");
+          for (int j = 0; j < 3; ++j) {
+            int k = (i+j) % N;
+            printf("\tp[%d]: (%d, %d)\n", k, GX[k], GY[k]);
+          }
           return false;
         }
       }
-      if (cmpf(p.x, 0) && cmpf(p.y, 0)) return false;
-      if (isOnLine(point(0,0), segment(p, q))) return false;
+      if (cmpf(p.x, 0) && cmpf(p.y, 0)) {
+        puts("found origin!");
+        printf("\tp[%d]: (%d, %d)\n", i, GX[i], GY[i]);
+        return false;
+      }
+      if (isOnLine(point(0,0), segment(p, q))) {
+        puts("pass origin!");
+        printf("\tp[%d]: (%d, %d)\n", i, GX[i], GY[i]);
+        printf("\tp[%d]: (%d, %d)\n", (i+1)%N, GX[(i+1)%N], GY[(i+1)%N]);
+        return false;
+      }
     }
     return true;
   }
@@ -118,6 +139,7 @@ protected:
       }
       if (!isPointInsidePolygon(p, G)) {
         puts("outside G!");
+        printf("\t(%.2lf, %.2lf)\n", p.x, p.y);
         return false;
       }
       for (int i = 0; i < N; ++i) {
@@ -128,30 +150,37 @@ protected:
       }
     }
 
-    puts("hehe");
+    // puts("hehe");
 
     // check two segments intersect with each other
+    // TODO: this part takes the longest of all, taking N^2
+    // N log N method exists, but I'm not sure it will be bug-free
+    // https://www.geeksforgeeks.org/given-a-set-of-line-segments-find-if-any-two-segments-intersect/
+    puts("checking intersecting...");
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < i; ++j) {
         segment s1 = L[i];
         segment s2 = L[j];
         bool intersect = false;
-        if (isOnSegment(s1.p1, s2)) intersect = true;
-        if (isOnSegment(s1.p2, s2)) intersect = true;
-        if (isOnSegment(s2.p1, s1)) intersect = true;
-        if (isOnSegment(s2.p2, s1)) intersect = true;
         if (isIntersecting(s1, s2)) intersect = true;
         if (intersect) {
           puts("intersect!");
           printf("i = %d, j = %d\n", i, j);
           printf("\t[(%.0lf,%.0lf),(%.0lf,%.0lf)]\n", L[i].p1.x, L[i].p1.y, L[i].p2.x, L[i].p2.y);
           printf("\t[(%.0lf,%.0lf),(%.0lf,%.0lf)]\n", L[j].p1.x, L[j].p1.y, L[j].p2.x, L[j].p2.y);
+          printf("\tisOnSameSide: %d\n", isOnSameSide(L[i].p1, L[i].p2, L[j]));
+          printf("\tisOnSameSide: %d\n", isOnSameSide(L[j].p1, L[j].p2, L[i]));
+          printf("\tisOnSegment : %d\n", isOnSegment(L[i].p1, L[j]));
+          printf("\tisOnSegment : %d\n", isOnSegment(L[i].p2, L[j]));
+          printf("\tisOnSegment : %d\n", isOnSegment(L[j].p1, L[i]));
+          printf("\tisOnSegment : %d\n", isOnSegment(L[j].p2, L[i]));
           return false;
         }
       }
     }
+    puts("checking intersecting done!");
 
-    puts("dah kok");
+    // puts("dah kok");
 
     return true;
   }
@@ -179,28 +208,284 @@ protected:
     );
 
     // Test Cases
-    // random in a square
-    CASE(square(1000), randomInsideSquare(1000, 1000));
-    CASE(square(1000), randomInsideSquare(10, 1000));
-    CASE(square(1000), randomInsideSquare(20, 1000));
-    CASE(square(1000), randomInsideSquare(30, 1000));
-    CASE(square(1000), randomInsideSquare(40, 1000));
-    CASE(square(1000), randomInsideSquare(50, 1000));
-    CASE(square(1000), randomInsideSquare(100, 1000));
-    CASE(square(1000), randomInsideSquare(500, 1000));
+    // 10% = 3TC: polygons, M = 0
+    CASE(regularPolygon(MAXN), clearL());
+    CASE(convexHullPolygon(MAXN, MAXX, MODE_SQUARE), clearL());
+    CASE(convexHullPolygon(MAXN, MAXX, MODE_CIRCLE), clearL());
+
+    // 30% = 9TC
+    // 1TC: inverse "small" pyramid
+    CASE(inversePyramid(100));
+    // 1TC: inverse "large" pyramid
+    CASE(inversePyramid(MAXM));
+    // 7TC: distorted inverse pyramid
+    for (int i = 0; i < 4; ++i) {
+      CASE(distortedInversePyramid(MAXM));
+    }
+    // 3TC: random ranges
+    CASE(randomRangeInversePyramid(MAXX, 100));
+    CASE(randomRangeInversePyramid(MAXX, 1000));
+    CASE(randomRangeInversePyramid(MAXX, MAXM));
+
+    // 60% = 18TC
+    // 2TC: distorted inverse pyramid four directions
+    CASE(distortedInversePyramidFourWays(100));
+    CASE(distortedInversePyramidFourWays(MAXM));
+    // 2TC: windmill
+    CASE(windmill(100));
+    CASE(windmill(1000));
+    // 3TC: random segments in a square
+    CASE(randomInsideSquare(100, MAXX));
+    CASE(randomInsideSquare(1000, MAXX));
+    CASE(randomInsideSquare(MAXM, MAXX));
+    // 3TC: random segments in a regular polygon
+    CASE(randomInsideRegularPolygon(25, 100, MAXX));
+    CASE(randomInsideRegularPolygon(50, 1000, MAXX));
+    CASE(randomInsideRegularPolygon(MAXN, MAXM, MAXX));
+    // 8TC: random segments inside convex hull
+    CASE(randomConvexHull(100, MAXX, MODE_SQUARE));
+    CASE(randomConvexHull(1000, MAXX, MODE_SQUARE));
+    CASE(randomConvexHull(MAXN, MAXX, MODE_SQUARE));
+    CASE(randomConvexHull(MAXN, MAXX, MODE_SQUARE));
+    CASE(randomConvexHull(100, MAXX, MODE_CIRCLE));
+    CASE(randomConvexHull(1000, MAXX, MODE_CIRCLE));
+    CASE(randomConvexHull(MAXN, MAXX, MODE_CIRCLE));
+    CASE(randomConvexHull(MAXN, MAXX, MODE_CIRCLE));
+  }
+
+  void clearG() {
+    N = 0;
+    GX.clear();
+    GY.clear();
   }
 
   void clearL() {
+    M = 0;
     LAX.clear();
     LBX.clear();
     LAY.clear();
     LBY.clear();
   }
 
+  void clear() {
+    clearG();
+    clearL();
+  }
+
   void square(int k) {
     N = 4;
     GX = {-k, k, k, -k};
     GY = {-k, -k, k, k};
+  }
+
+  void regularPolygon(int n) {
+    // "random" polygon
+    clearG();
+    // N = n;
+    double r = MAXX;
+    polygon P;
+    for (int i = 0; i < n; ++i) {
+      point p(r * cos(PI * 2 * i / (double)n), r * sin(PI * 2 * i / (double)n));
+      P.push_back(point(round(p.x), round(p.y)));
+      // GX.push_back(round(p.x));
+      // GY.push_back(round(p.y));
+    }
+    polygon hull = convexHull(P);
+    N = hull.size();
+    for (int i = 0; i < N; ++i) {
+      GX.push_back(hull[i].x);
+      GY.push_back(hull[i].y);
+    }
+  }
+
+  void convexHullPolygon(int n, int k, int mode) {
+    clearG();
+
+    // generate n random points inside the square/circle
+    vector<pair<int,int>> P;
+    map<pair<int,int>,bool> used;
+    used[make_pair(0,0)] = true;
+
+    if (mode == MODE_SQUARE) {
+      for (int i = 0; i < n; ++i) {
+        int x, y;
+        do {
+          x = rnd.nextInt(-k, k);
+          y = rnd.nextInt(-k, k);
+        } while (used[make_pair(x,y)]);
+        used[make_pair(x,y)] = true;
+        P.emplace_back(x,y);
+      }
+    } else if (mode == MODE_CIRCLE) {
+      double R = k;
+      for (int i = 0; i < n; ++i) {
+        int x, y;
+        do {
+          double r = rnd.nextDouble(R);
+          double a = rnd.nextDouble(PI*2);
+          double xx = r * cos(a);
+          double yy = r * sin(a);
+          x = round(xx);
+          y = round(yy);
+        } while (used[make_pair(x,y)]);
+        used[make_pair(x,y)] = true;
+        P.emplace_back(x,y);
+      }
+    } else {
+      printf("unknown mode: %d\n", mode);
+      assert(false);
+    }
+
+    polygon hull = convexHull(pointFromVectorPair(P));
+    N = hull.size();
+    for (int i = 0; i < N; ++i) {
+      GX.push_back(hull[i].x);
+      GY.push_back(hull[i].y);
+    }
+  }
+
+  void inversePyramid(int s) {
+    clear();
+    square(s);
+    M = s-2;
+    for (int i = 0; i < M; ++i) {
+      LAX.push_back(-(i+1));
+      LAY.push_back(i+2);
+      LBX.push_back((i+1));
+      LBY.push_back(i+2);
+    }
+  }
+
+  void distortedInversePyramid(int s) {
+    clear();
+    square(s);
+    M = s-2;
+    for (int i = 0; i < M; ++i) {
+      LAX.push_back(-(i+1));
+      LAY.push_back(i+2);
+      LBY.push_back(i+2);
+      if (i < M/2 || i == M-1) {
+        LBX.push_back((i+1));
+      } else {
+        LBX.push_back(rnd.nextInt(-10,10));
+      }
+    }
+  }
+
+  vector<pair<int,int>> generateRanges(int minx, int maxx, int n) {
+    if (n == 0) return {};
+    if (n == 1) {
+      while (true) {
+        int l = rnd.nextInt(minx, maxx);
+        int r = rnd.nextInt(minx, maxx);
+        if (l == r) continue;
+        if (l > r) swap(l, r);
+        return{{l,r}};
+      }
+    }
+    int len = maxx-minx;
+    // generate n-1 distinct numbers in range [1..len-n]
+    vector<int> x;
+    for (int i = 0; i < n-1; ++i) {
+      x.push_back(rnd.nextInt(1, len-2*n+1));
+    }
+    sort(x.begin(), x.end());
+    for (int i = 0; i < n-1; ++i) x[i] += 2*i;
+    vector<pair<int,int>> ret;
+    ret.emplace_back(rnd.nextInt(x[0]), x[0]);
+    for (int i = 1; i < n-1; ++i) {
+      ret.emplace_back(rnd.nextInt(x[i-1]+1, x[i]-1), x[i]);
+    }
+    while (true) {
+      int l = rnd.nextInt(x[n-2]+1, len);
+      int r = rnd.nextInt(x[n-2]+1, len);
+      if (l == r) continue;
+      if (l > r) swap(l, r);
+      ret.emplace_back(l, r);
+      break;
+    }
+    assert(ret.size() == n);
+    for (int i = 0; i < n; ++i) {
+      ret[i].first += minx;
+      ret[i].second += minx;
+    }
+    return ret;
+  }
+
+  void randomRangeInversePyramid(int s, int m) {
+    clear();
+    square(s);
+    int maxs = s/2-1;
+    vector<int> c(maxs+1);
+    for (int i = 0; i < m; ++i) {
+      while (true) {
+        int r = rnd.nextInt(1, maxs);
+        if (c[r] < r) {
+          c[r]++;
+          break;
+        }
+      }
+    }
+    clearL();
+    M = m;
+    for (int y = 1; y <= maxs; ++y) {
+      if (!c[y]) continue;
+      auto pairs = generateRanges(-y, y, c[y]);
+      for (auto pair : pairs) {
+        LAX.push_back(pair.first);
+        LBX.push_back(pair.second);
+        LAY.push_back(2*y);
+        LBY.push_back(2*y);
+      }
+    }
+  }
+
+  void distortedInversePyramidFourWays(int s) {
+    clear();
+    square(s);
+    M = MAXM / 4 * 4;
+    if ((s-2)*4 < M) {
+      M = (s-2)*4;
+    }
+    auto insertSegment = [&](int y, int x1, int x2, int d) {
+      point p1(x1, y), p2(x2, y);
+      for (int i = 0; i < d; ++i) {
+        p1 = rotate(p1, PI/2);
+        p2 = rotate(p2, PI/2);
+      }
+      LAX.push_back(round(p1.x));
+      LAY.push_back(round(p1.y));
+      LBX.push_back(round(p2.x));
+      LBY.push_back(round(p2.y));
+    };
+    for (int i = 0; i < M/4; ++i) {
+      int y = i+2;
+      int x1 = -(i+1);
+      int x2 = i+1;
+      if (i < M/8 || i == M/4-1) x2 = (i+1);
+      for (int d = 0; d < 4; ++d) {
+        insertSegment(y, x1, x2, d);
+      }
+    }
+  }
+
+  void windmill(int n) {
+    clear();
+    square(MAXX);
+
+    double r1 = 0.9 * MAXX;
+    double r2 = 0.8 * MAXX;
+
+    M = n;
+    for (int i = 0; i < n; ++i) {
+      point p1(r1 * cos(PI * 2 * i / (double)n), r1 * sin(PI * 2 * i / (double)n));
+      point p2(r2 * cos(PI * 2 * (i+2) / (double)n), r2 * sin(PI * 2 * (i+2) / (double)n));
+
+      LAX.push_back(round(p1.x));
+      LAY.push_back(round(p1.y));
+      LBX.push_back(round(p2.x));
+      LBY.push_back(round(p2.y));
+    }
   }
 
   vector<pair<pair<int,int>,pair<int,int>>> pairPoints(const vector<pair<int,int>> &P) {
@@ -230,36 +515,8 @@ protected:
         assert(!used[q2]);
         used[q1] = true;
         used[q2] = true;
-        if (res.size() == 388 || res.size() == 369) {
-          printf("i = %d, hull.size() = %d,%d, depth = %d\n", res.size(), s, i, depth);
-        }
         res.emplace_back(q1, q2);
       }
-      // for (int i = 0; i < s; i++) {
-      //   point p1 = hull[i];
-      //   pair<int,int> q1 = make_pair(round(p1.x), round(p1.y));
-      //   while (i+1 < s && used[q1]) {
-      //     i++;
-      //     p1 = hull[i];
-      //     q1 = make_pair(round(p1.x), round(p1.y));
-      //   }
-      //   if (used[q1]) break;
-
-      //   i++;
-      //   point p2 = hull[i];
-      //   pair<int,int> q2 = make_pair(round(p2.x), round(p2.y));
-      //   while (i+1 < s && used[q2]) {
-      //     i++;
-      //     p2 = hull[i];
-      //     q2 = make_pair(round(p2.x), round(p2.y));
-      //   }
-      //   if (used[q2]) break;
-      //   if (q1 == q2) break;
-
-      //   used[q1] = true;
-      //   used[q2] = true;
-      //   res.emplace_back(q1, q2);
-      // }
       vector<pair<int,int>> tmp;
       for (auto p : C) {
         if (!used[p]) tmp.push_back(p);
@@ -274,6 +531,8 @@ protected:
 
   void randomInsideSquare(int m, int k) {
     clearL();
+    clearG();
+    square(k);
     M = m;
 
     // generate 2m random points inside the square
@@ -290,46 +549,142 @@ protected:
       P.emplace_back(x,y);
     }
 
-    // vector<pair<pair<int,int>,pair<int,int>>> pairPoints(P);
+    auto pairs = pairPoints(P);
+    assert(pairs.size() == M);
+    assignL(pairs);
+  }
 
-    auto hasIntersecting = [&]() -> pair<int,int> {
-      for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < i; ++j) {
-          segment si = segment(point(P[2*i]), point(P[2*i+1]));
-          segment sj = segment(point(P[2*j]), point(P[2*j+1]));
-          if (isIntersecting(si, sj)) return make_pair(i,j);
-        }
-      }
-      return make_pair(-1,-1);
-    };
+  void randomInsideRegularPolygon(int n, int m, int k) {
+    clearL();
+    clearG();
+    regularPolygon(n);
+    M = m;
+
+    // generate 2m random points inside the circle
+    double R = k-100;
+    vector<pair<int,int>> P;
+    map<pair<int,int>,bool> used;
+    used[make_pair(0,0)] = true;
+    for (int i = 0; i < 2*m; ++i) {
+      int x, y;
+      do {
+        double r = rnd.nextDouble(R);
+        double a = rnd.nextDouble(PI*2);
+        double xx = r * cos(a);
+        double yy = r * sin(a);
+        x = round(xx);
+        y = round(yy);
+      } while (used[make_pair(x,y)]);
+      used[make_pair(x,y)] = true;
+      P.emplace_back(x,y);
+    }
 
     auto pairs = pairPoints(P);
     assert(pairs.size() == M);
+    assignL(pairs);
+  }
 
-    // long long iteration = 0;
-    // while (true) {
-    //   iteration++;
-    //   auto t = hasIntersecting();
-    //   if (iteration % 1000 == 0) {
-    //     printf("iteration: %lld\n", iteration);
-    //     double length = 0;
-    //     for (int i = 0; i < m; ++i) {
-    //       length += dist(point(P[2*i]), point(P[2*i+1]));
-    //     }
-    //     printf("\ttotal length = %.3lf\n", length);
-    //   }
-    //   if (t == make_pair(-1,-1)) break;
-    //   // printf("has intersection: (%d, %d)\n", t.first, t.second);
-    //   // printf("\t[(%d,%d),(%d,%d)]\n", P[2*t.first].first, P[2*t.first].second, P[2*t.first+1].first, P[2*t.first+1].second);
-    //   // printf("\t[(%d,%d),(%d,%d)]\n", P[2*t.second].first, P[2*t.second].second, P[2*t.second+1].first, P[2*t.second+1].second);
-    //   swap(P[2*t.first+1],P[2*t.second]);
+  void randomConvexHull(int m, int k, int mode) {
+    clearL();
+    clearG();
+    M = m;
+
+    // generate 2m random points inside the square/circle
+    vector<pair<int,int>> P;
+    map<pair<int,int>,bool> used;
+    used[make_pair(0,0)] = true;
+
+    if (mode == MODE_SQUARE) {
+      for (int i = 0; i < 2*m; ++i) {
+        int x, y;
+        do {
+          x = rnd.nextInt(-k, k);
+          y = rnd.nextInt(-k, k);
+        } while (used[make_pair(x,y)]);
+        used[make_pair(x,y)] = true;
+        P.emplace_back(x,y);
+      }
+    } else if (mode == MODE_CIRCLE) {
+      double R = k;
+      for (int i = 0; i < 2*m; ++i) {
+        int x, y;
+        do {
+          double r = rnd.nextDouble(R);
+          double a = rnd.nextDouble(PI*2);
+          double xx = r * cos(a);
+          double yy = r * sin(a);
+          x = round(xx);
+          y = round(yy);
+        } while (used[make_pair(x,y)]);
+        used[make_pair(x,y)] = true;
+        P.emplace_back(x,y);
+      }
+    } else {
+      printf("unknown mode: %d\n", mode);
+      assert(false);
+    }
+
+    polygon hull = convexHull(pointFromVectorPair(P));
+    vector<pair<int,int>> tmp;
+    used.clear();
+    clearG();
+    for (point p : hull) {
+      int x = round(p.x), y = round(p.y);
+      if (used[make_pair(x,y)]) continue;
+      GX.push_back(x);
+      GY.push_back(y);
+      N++;
+      used[make_pair(x,y)] = true;
+    }
+    // printf("N = %d\n", N);
+    // printf("Polygon(");
+    // for (int i = 0; i < N; ++i) {
+    //   printf("Point({%d,%d})", GX[i], GY[i]);
+    //   if (i < N-1) printf(",");
     // }
+    // printf(")\n");
+    for (auto p : P) {
+      if (!used[make_pair(p.first, p.second)]) {
+        tmp.push_back(p);
+      }
+    }
+    if (tmp.size() % 2) tmp.pop_back();
+    M = tmp.size() / 2;
 
-    for (int i = 0; i < M; ++i) {
+    auto pairs = pairPoints(tmp);
+    assert(pairs.size() == M);
+
+    assignL(pairs);
+  }
+
+  void assignL(const vector<pair<pair<int,int>,pair<int,int>>> &pairs) {
+    clearL();
+    for (int i = 0; i < pairs.size(); ++i) {
+      point p1(pairs[i].first);
+      point p2(pairs[i].second);
+      if (isOnSegment(origin, segment(p1, p2))) continue;
       LAX.push_back(pairs[i].first.first);
       LAY.push_back(pairs[i].first.second);
       LBX.push_back(pairs[i].second.first);
       LBY.push_back(pairs[i].second.second);
+    }
+    M = LAX.size();
+  }
+
+  void cleanup() {
+    // remove segments in L passing the origin
+    for (int i = 0; i < M; ++i) {
+      point p1((double)LAX[i], (double)LAY[i]);
+      point p2((double)LBX[i], (double)LBY[i]);
+      if (isOnSegment(origin, segment(p1, p2))) {
+        printf("one segment passing origin found, removing ...\n");
+        LAX.erase(LAX.begin()+i);
+        LBX.erase(LBX.begin()+i);
+        LAY.erase(LAY.begin()+i);
+        LBY.erase(LBY.begin()+i);
+        M--;
+        i--;
+      }
     }
   }
 };
