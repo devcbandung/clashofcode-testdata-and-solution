@@ -119,7 +119,7 @@ Suppose you want to build test cases for problem `devc-problem`. Here are the st
     ```bash
     build devc-problem
     ```
-    (or alternatively, just `build` from anywhere inside the repository).
+    (or alternatively, just `build` from inside the problem folder).
 
 Few notes:
 - Hackerrank is unable to distinguish file names between real and sample cases. Hence, do not create sample test cases using tcframe! Treat all test cases as normal test cases, and mark sample cases manually in Hackerrank challenge dashboard. Use few first test cases as sample, like [this](https://github.com/devcbandung/devc-clash-of-code-2020/blob/master/devc-member-growth/spec.cpp#L31-L33).
@@ -160,3 +160,9 @@ Ideally, a problem needs at least two solutions to make sure that the main solut
     [ VERDICT ]
       Accepted [100]
     ```
+
+## License
+
+The codes inside this repository is licensed under [MIT](https://github.com/devcbandung/clashofcode-testdata/blob/master/LICENSE.txt).
+
+We include a copy of [tcframe](https://tcframe.toki.id/) inside this repository, which is licensed under [MIT](https://github.com/devcbandung/clashofcode-testdata/blob/master/tcframe/LICENSE.txt) as well.
