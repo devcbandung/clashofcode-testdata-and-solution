@@ -20,6 +20,35 @@ void debugPoint(const point &p) {
   debug("Point({%.5lf,%.5lf})", p.x, p.y);
 }
 
+void printfSegment(const segment &a) {
+  printf("Segment(Point({%.5lf,%.5lf}),Point({%.5lf,%.5lf}))", a.p1.x, a.p1.y, a.p2.x, a.p2.y);
+}
+
+void printfPoint(const point &p) {
+  printf("Point({%.5lf,%.5lf})", p.x, p.y);
+}
+
+char buffer[1000];
+string sprintfSegment(const segment &a) {
+  sprintf(buffer, "Segment(Point({%.5lf,%.5lf}),Point({%.5lf,%.5lf}))", a.p1.x, a.p1.y, a.p2.x, a.p2.y);
+  return buffer;
+}
+
+string sprintfPoint(const point &p) {
+  sprintf(buffer, "Point({%.5lf,%.5lf})", p.x, p.y);
+  return buffer;
+}
+
+string execute(const vector<string> cmds) {
+  string cmd = "Execute[{";
+  for (int i = 0; i < cmds.size(); ++i) {
+    if (i) cmd += ",";
+    cmd += "\"" + cmds[i] + "\"";
+  }
+  cmd += "}]";
+  return cmd;
+}
+
 double patan2(double y, double x) {
   double ret = atan2(y, x);
   while (ret < 0) ret += 2 * PI;
@@ -82,9 +111,11 @@ int main() {
     return patan2(a.p1.y, a.p1.x) < patan2(b.p1.y, b.p1.x);
   });
 
+  vector<string> Scmd;
   for (int i = 0; i < S.size(); ++i) {
     point p1 = S[i].p1;
     point p2 = S[i].p2;
+    Scmd.push_back(sprintfSegment(S[i]));
     debug("S_{%da} = ", i); debugPoint(p1); debug("\n");
     debug("S_{%db} = ", i); debugPoint(p2); debug("\n");
     debug("S_{%d} = ", i); debugSegment(S[i]); debug("\n");
@@ -93,6 +124,7 @@ int main() {
   // for (segment s : S) {
   //   debugSegment(s); debug("\n");
   // }
+  puts(execute(Scmd).c_str());
 
   vector<segment> done;
   vector<segment> T;
@@ -233,12 +265,18 @@ int main() {
   }
 
   debug("\n\nDONE!\n");
+  vector<string> Dcmd;
   for (segment s : done) {
+    string poly = "Polygon(" + sprintfPoint(point(0,0)) + "," + sprintfPoint(s.p1) + "," + sprintfPoint(s.p2) + ")";
+    Dcmd.push_back(poly);
+    // printfPoint(s.p1);
+    // printfPoint(s.p2);
     debug("Polygon("); debugPoint(point(0,0)); debug(","); debugPoint(s.p1); debug(","); debugPoint(s.p2); debug(")\n");
     assert(length(s) > EPS);
     // debugSegment(s); debug("\n");
   }
   debug("done.size(): %d\n", done.size());
+  puts(execute(Dcmd).c_str());
 
   double ans = 0;
   double angle = 0;

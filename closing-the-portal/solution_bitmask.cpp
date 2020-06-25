@@ -92,14 +92,10 @@ bool play(int player, int mask) {
     int newMask = mask | (1 << i);
     if (portalClosed(newMask)) continue;
     if (!play(1 - player, newMask)) {
-      // printf("player = %c, maze: win\n", "AB"[player]);
-      // printMask(mask);
       dp[player][mask] = 1;
       return true;
     }
   }
-  // printf("player = %c, maze: lose\n", "AB"[player]);
-  // printMask(mask);
   dp[player][mask] = -1;
   return false;
 }

@@ -136,7 +136,6 @@ int main() {
 
   // going up first
   for (int di = 0; di < 2; ++di) {
-    // printf("DI = %d\n", di);
     for (int t = 0; t < p[di].size();) {
       // we need to process points within the same v together
       int cv = v[p[di][t]];
@@ -147,7 +146,6 @@ int main() {
       }
       // query for every points in cp
       for (int i : cp) {
-        // printf("di = %d, point = [%d](%d, %d), v = (%d)\n", di, i, x[i], y[i], v[i]);
         long long addum = 0;
         for (int cx = max(0, x[i] - d); cx <= min(MAXX, x[i] + d); cx++) {
           int ly, ry;
@@ -160,12 +158,9 @@ int main() {
           }
           int sum = rt[di][cx].sum(ly, ry);
           addum += sum;
-          // printf("\tquery for (%d, %d): cx = %d, cy = [%d, %d]: %d\n", x[i], y[i], cx, ly, ry, sum);
         }
         ans += addum;
-        // printf("[TOTAL] = %lld, di = %d, point = [%d](%d, %d), v = (%d)\n", addum, di, i, x[i], y[i], v[i]);
       }
-      // printf("di = %d, v = %d, query done!\n", di, cv);
       // count pair of points in cp that has distance <= d
       long long mans = 0;
       for (int i : cp) {
@@ -180,21 +175,11 @@ int main() {
         cpm[di][x[i]].add(y[i], -1);
       }
       ans += mans;
-      // printf("[TOTAL] = %lld, di = %d, v = %d, pairing done!\n", mans, di, cv);
-      // printf("di = %d, v = %d, adding to range tree...\n", di, cv);
       // add cp to rt
       for (int i : cp) {
-        // printf("\tadding (%d, %d)...\n", x[i], y[i]);
-        // printf("\tp[%d][%d] =", di, x[i]);
-        // for (int y : py[di][x[i]]) {
-        //   printf(" %d", y);
-        // }
-        // printf("\n");
         rt[di][x[i]].add(y[i], 1);
       }
-      // printf("di = %d, v = %d, adding done!\n", di, cv);
     }
-    // printf("after di = %d, ans = %lld\n", di, ans);
   }
 
   // now pair of points with different directions

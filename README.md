@@ -1,14 +1,19 @@
 # DevC Clash of Code 2020
 
-This repository contains solutions and test cases generation files for DevC Clash of Code 2020 by DevC Bandung and Semarang. We use [tcframe](https://tcframe.toki.id/) as test case generator framework.
+This repository contains solutions and test cases generation files for [DevC Clash of Code 2020](https://devcbandung.github.io/clashofcode) by [DevC Bandung](https://www.facebook.com/groups/DevCBandung) and [DevC Semarang](https://www.facebook.com/groups/DevCSemarang) on June 13 - June 25 2020.
 
-## Geting Started
+## Generating Test Cases
 
-This are only tested inside WSL2 Ubuntu 18.04, but should run as well in other unix-based environments. Here are the steps needed before running:
+We use [tcframe](https://tcframe.toki.id/) as test case generator framework.
 
-- Install necessary executables:
+### Initializing
+
+Before you can start generating test cases, you should run these commands. These are only tested inside Ubuntu 18.04 on WSL2, but it should run as well on other UNIX-based environments.
+
+- Install necessary executables (`g++` and `zip`):
     ```bash
     sudo apt-get install g++ zip
+    # on other OS, you may use different package managers
     ```
 - Export necessary env and aliases:
     ```bash
@@ -16,7 +21,91 @@ This are only tested inside WSL2 Ubuntu 18.04, but should run as well in other u
     ```
     Note that if you use [zsh plugin for .env](https://github.com/johnhamelink/env-zsh), this step is automatically done.
 
-### Adding Problems
+### Generating Test Cases
+
+Suppose you want to generate test cases for problems `devc-member-growth`. You just need to run this:
+
+```bash
+build devc-member-growth
+```
+
+If everything went correctly, you should get output similar to this:
+
+```
+Building test cases for problem devc-member-growth...
+Compiling solution and spec...
+Generating test cases...
+
+[ SAMPLE TEST CASES ]
+
+[ OFFICIAL TEST CASES ]
+  devc-member-growth_1: OK
+  devc-member-growth_2: OK
+  devc-member-growth_3: OK
+  devc-member-growth_4: OK
+  devc-member-growth_5: OK
+  devc-member-growth_6: OK
+  devc-member-growth_7: OK
+  devc-member-growth_8: OK
+
+Generation finished. All test cases OK.
+Packing test cases...
+  adding: input/input1.txt (stored 0%)
+  adding: input/input2.txt (stored 0%)
+  adding: input/input3.txt (stored 0%)
+  adding: input/input4.txt (stored 0%)
+  adding: input/input5.txt (stored 0%)
+  adding: input/input6.txt (stored 0%)
+  adding: input/input7.txt (stored 0%)
+  adding: input/input8.txt (stored 0%)
+  adding: output/output1.txt (stored 0%)
+  adding: output/output2.txt (stored 0%)
+  adding: output/output3.txt (stored 0%)
+  adding: output/output4.txt (stored 0%)
+  adding: output/output5.txt (stored 0%)
+  adding: output/output6.txt (stored 0%)
+  adding: output/output7.txt (stored 0%)
+  adding: output/output8.txt (stored 0%)
+Packing done. File tc-devc-member-growth.zip ready to upload!
+```
+
+Now you will see new folder `devc-member-growth/tc` containing all test cases (file `.in` for input and `.out` for the expected output), and a zip file `devc-member-growth/tc-devc-member-growth.zip` as well. The structure of the zip file is different from the `/tc` folder, because we need to conform with the Hackerrank input/output format.
+
+## Testing Your Own Solution Locally
+
+Tcframe has a nice feature to test your own solution locally.
+
+- Follow steps on the previous section to generate test cases.
+- Create your own solution inside the problem folder. Let's say it's named `solution_mine.cpp`. Don't forget to compile it:
+    ```bash
+    g++ solution_mine.cpp -o solution_mine.cpp
+    ```
+- Then run this to test your solution:
+    ```bash
+    ./runner grade --solution=./solution_mine
+    ```
+
+    You would get output similar to this:
+    ```
+    Local grading with solution command: './solution_mine'...
+
+    [ SAMPLE TEST CASES ]
+
+    [ OFFICIAL TEST CASES ]
+      devc-member-growth_1: Accepted
+      devc-member-growth_2: Accepted
+      devc-member-growth_3: Accepted
+      devc-member-growth_4: Accepted
+      devc-member-growth_5: Accepted
+      devc-member-growth_6: Accepted
+      devc-member-growth_7: Accepted
+      devc-member-growth_8: Accepted
+
+    [ VERDICT ]
+      Accepted [100]
+    ```
+
+## Adding New Problems
 
 Suppose you want to build test cases for problem `devc-problem`. Here are the steps you need to do.
 
@@ -26,52 +115,11 @@ Suppose you want to build test cases for problem `devc-problem`. Here are the st
     ```
 - Create the solution file named `solution.cpp`.
 - Create `spec.cpp` file containing the problem and test case spec file. Read [tcframe guide](https://tcframe.toki.id/en/stable/getting-started/getting-started.html#writing-spec-file) or consult existing `spec.cpp` files on other problems for guides on creating spec file.
-- Run the following command from inside the `devc-problem` folder:
+- Then, generate test case just like explained on the previous section.
     ```bash
-    build
+    build devc-problem
     ```
-    (or alternatively, `build devc-problem` from anywhere inside the repository).
-    
-    This will compile your solution and spec files, and automatically generate test cases files to `tc/*`, and zip them into `devc-problem/tc-devc-problem.zip`, which conforms to Hackerrank test case format.
-
-    You should get output similar to this:
-    ```
-    Building test cases for problem devc-problem...
-    Compiling solution and spec...
-    Generating test cases...
-
-    [ SAMPLE TEST CASES ]
-
-    [ OFFICIAL TEST CASES ]
-      devc-problem_1: OK
-      devc-problem_2: OK
-      devc-problem_3: OK
-      devc-problem_4: OK
-      devc-problem_5: OK
-      devc-problem_6: OK
-      devc-problem_7: OK
-      devc-problem_8: OK
-
-    Generation finished. All test cases OK.
-    Packing test cases...
-      adding: input/input1.txt (stored 0%)
-      adding: input/input2.txt (stored 0%)
-      adding: input/input3.txt (stored 0%)
-      adding: input/input4.txt (stored 0%)
-      adding: input/input5.txt (stored 0%)
-      adding: input/input6.txt (stored 0%)
-      adding: input/input7.txt (stored 0%)
-      adding: input/input8.txt (stored 0%)
-      adding: output/output1.txt (stored 0%)
-      adding: output/output2.txt (stored 0%)
-      adding: output/output3.txt (stored 0%)
-      adding: output/output4.txt (stored 0%)
-      adding: output/output5.txt (stored 0%)
-      adding: output/output6.txt (stored 0%)
-      adding: output/output7.txt (stored 0%)
-      adding: output/output8.txt (stored 0%)
-    Packing done. File tc-devc-problem.zip ready to upload!
-    ```
+    (or alternatively, just `build` from anywhere inside the repository).
 
 Few notes:
 - Hackerrank is unable to distinguish file names between real and sample cases. Hence, do not create sample test cases using tcframe! Treat all test cases as normal test cases, and mark sample cases manually in Hackerrank challenge dashboard. Use few first test cases as sample, like [this](https://github.com/devcbandung/devc-clash-of-code-2020/blob/master/devc-member-growth/spec.cpp#L31-L33).

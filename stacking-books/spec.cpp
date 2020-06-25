@@ -73,7 +73,6 @@ protected:
     BX2 = bx2;
     BY1 = by1;
     BY2 = by2;
-    // printf("TC:\n((%d, %d), (%d, %d))\n((%d, %d), (%d, %d))\n", ax1, ay1, ax2, ay2, bx1, by1, bx2, by2);
   }
 
   // comp:
@@ -81,7 +80,6 @@ protected:
   // 1: equal
   // 2: greater
   void randomWithComp(int sx1, int sx2, int sy1, int sy2) {
-    // printf("sx1 = %d, sx2 = %d, sy1 = %d, sy2 = %d\n", sx1, sx2, sy1, sy2);
     vector<int> x = randomPoints(sx1, sx2);
     vector<int> y = randomPoints(sy1, sy2);
     assert(x.size() == 4);

@@ -125,7 +125,7 @@ protected:
 
     // check pass origin
     for (segment s : L) {
-      if (isOnLine(point(0,0), s)) {
+      if (isOnSegment(origin, s)) {
         puts("pass origin!");
         return false;
       }
@@ -281,14 +281,11 @@ protected:
   void regularPolygon(int n) {
     // "random" polygon
     clearG();
-    // N = n;
     double r = MAXX;
     polygon P;
     for (int i = 0; i < n; ++i) {
       point p(r * cos(PI * 2 * i / (double)n), r * sin(PI * 2 * i / (double)n));
       P.push_back(point(round(p.x), round(p.y)));
-      // GX.push_back(round(p.x));
-      // GY.push_back(round(p.y));
     }
     polygon hull = convexHull(P);
     N = hull.size();
@@ -636,13 +633,6 @@ protected:
       N++;
       used[make_pair(x,y)] = true;
     }
-    // printf("N = %d\n", N);
-    // printf("Polygon(");
-    // for (int i = 0; i < N; ++i) {
-    //   printf("Point({%d,%d})", GX[i], GY[i]);
-    //   if (i < N-1) printf(",");
-    // }
-    // printf(")\n");
     for (auto p : P) {
       if (!used[make_pair(p.first, p.second)]) {
         tmp.push_back(p);

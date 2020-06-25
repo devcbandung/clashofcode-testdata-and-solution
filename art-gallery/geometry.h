@@ -3,7 +3,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
 double _acos(double x) {
 	double ret = acos(x);
 	if (ret == ret) return ret;
@@ -129,12 +128,9 @@ bool isOnLine(const point &p, const segment &l){
 }
 bool isOnSegment(const point &p, const segment &s){
 	double c = cross(p - s.p1, s.p2 - p);
-	// printf("\tisOnSegment: cross: %.17lf\n", c);
 	if (fabs(c) > EPS) return false;
 	double d = dot(s.p2 - s.p1, p - s.p1);
-	// printf("\tisOnSegment: dot = %.2lf\n", d);
 	return d > -EPS && d < sqr(s.p2.x - s.p1.x) + sqr(s.p2.y - s.p1.y) + EPS;
-	// return fabs(dist(p, s.p1) + dist(p, s.p2) - dist(s.p1, s.p2)) < EPS;
 }
 bool isIntersecting(const segment &s1, const segment &s2){
 	return !(isOnSameSide(s1.p1,s1.p2,s2) || isOnSameSide(s2.p1,s2.p2,s1)) || isOnSegment(s1.p1,s2) || isOnSegment(s1.p2,s2) || isOnSegment(s2.p1,s1) || isOnSegment(s2.p2,s1);
@@ -172,73 +168,8 @@ segment lineBisector(const segment &s){
 	return lineBisector(s.p1, s.p2);
 }
 
-/** introducing circle **/
-struct circle {
-	point center;
-	double r;
-	circle() { center = point(0, 0); r = 0; }
-	circle(point p, double r) : center(p), r(r) {}
-};
-double area(const circle &c){
-	return PI * c.r * c.r;
-}
-double perimeter(const circle &c){
-	return 2. * PI * c.r;
-}
-bool isOnCircle(const point &p, const circle &c){
-	return dist(p,c.center) == c.r;
-}
-bool isInsideCircle(const point &p, const circle &c){
-	return dist(p,c.center) + EPS < c.r;
-}
-bool isOutsideCircle(const point &p, const circle &c){
-	return dist(p,c.center) > c.r + EPS;
-}
-bool isTangent(const segment &l, const circle &c){
-	return distToLine(c.center,l) == c.r;
-}
-vector<point> intersectionLineCircle(const segment &l, const circle &c){
-	vector<point> res;
-	double dx = l.p2.x - l.p1.x;
-	double dy = l.p2.y - l.p1.y;
-	double dr = length(l);
-	double d  = cross(l.p1 - c.center,l.p2 - c.center);
-	if (sqr(c.r) * sqr(dr) - sqr(d) + EPS < 0) return res;
-	double det = sqrt(fabs(sqr(c.r) * sqr(dr) - sqr(d)));
-	double sdx = dy < 0 ? -dx : dx;
-	double sdy = fabs(dy);
-	res.push_back(c.center + point((d*dy + sdx * det)/sqr(dr), (-d*dx + sdy * det)/sqr(dr)));
-	if (det > EPS) res.push_back(c.center + point((d*dy - sdx * det)/sqr(dr), (-d*dx - sdy * det)/sqr(dr)));
-	return res;
-}
-vector<point> intersectionSegmentCircle(const segment &s, const circle &c){
-	vector<point> res, _res = intersectionLineCircle(s,c);
-	for (vector<point>::iterator it = _res.begin(); it != _res.end(); ++it){
-		if (isOnSegment(*it,s)) res.push_back(*it);
-	}
-	return res;
-}
-vector<point> intersectionCircleCircle(const circle &c1, const circle &c2){
-	vector<point> res;
-	return res;
-}
-
 /** introducing polygon **/
 typedef vector<point> polygon;
-/** triangle properties **/
-typedef vector<point> triangle;
-point centroid(triangle t){
-	if (t.size() != 3) assert(false);
-	return (t[0] + t[1] + t[2]) / 3.;
-}
-point orthocenter(triangle t){
-	if (t.size() != 3) assert(false);
-	return intersection(segment(t[0], projection(t[0], segment(t[1], t[2]))), segment(t[1], projection(t[1], segment(t[0], t[2]))));
-}
-point circumcenter(triangle t){
-	if (t.size() != 3) assert(false);
-	return intersection(lineBisector(t[0],t[1]),lineBisector(t[1],t[2]));
-}
 
 /** Area of Polygon **/
 /* complexity : O(N) */
@@ -273,30 +204,21 @@ bool isPointInsidePolygon(point p, const polygon &poly){
 	for (int i = 0; i < n; ++i){
 		segment side(poly[i],poly[(i+1)%n]);
 		if (isOnSegment(p,side)) {
-			// printf("on segment on i = %d\n", i);
 			return false;
 		}
 		if (isParallel(ray,side)) continue;
 		point x = intersection(ray,side);
-		// printf("%d-th side: (%.2lf,%.2lf),(%.2lf,%.2lf)\n", i, side.p1.x, side.p1.y, side.p2.x, side.p2.y);
-		// printf("intersection with %d: (%.2lf,%.2lf)\n", i, x.x, x.y);
-		// double d = dot(x-p,ray.p2-p);
-		// printf("\tdot = %.2lf\n", d);
 		if (isOnSegment(x,side) && dot(x-p,ray.p2-p) > -EPS){
-			// printf("ON SEGMENT!!!");
 			/* special case: x is one of vertices of sides */
 			if (x == side.p1){
-				// printf("ON SIDE.P1!!");
 				if (isRightTurn(p,x,side.p2)) nIntersection ++;
 			}
 			else if (x == side.p2){
-				// printf("ON SIDE.P2!!");
 				if (isRightTurn(p,x,side.p1)) nIntersection ++;
 			}
 			else nIntersection ++;
 		}
 	}
-	// printf("nintersection: %d\n", nIntersection);
 	return nIntersection % 2 == 1;
 }
 
