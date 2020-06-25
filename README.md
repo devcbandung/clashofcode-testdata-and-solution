@@ -8,7 +8,7 @@ We use [tcframe](https://tcframe.toki.id/) as test case generator framework.
 
 ### Initializing
 
-Before you can start generating test cases, you should run these commands. These are only tested inside Ubuntu 18.04 on WSL2, but it should run as well on other UNIX-based environments.
+Before you can start generating test cases, you should run these commands. These are only tested on [Ubuntu 18.04 on WSL2](https://wiki.ubuntu.com/WSL), but it should run as well on other UNIX-based environments.
 
 - Install necessary executables (`g++` and `zip`):
     ```bash
