@@ -4,7 +4,7 @@ This repository contains solutions and test cases generation files for [DevC Cla
 
 ## Generating Test Cases
 
-We use [tcframe](https://tcframe.toki.id/) as test case generator framework.
+We do not store the actual test cases inside this repository, since the size may be large for some problems. Instead, we use [tcframe](https://tcframe.toki.id/) as test case generator framework.
 
 ### Initializing
 
